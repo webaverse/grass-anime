@@ -3,13 +3,18 @@ import {
   GLSL3,
   TextureLoader,
   DoubleSide,
-  Vector2,
+  // Vector2,
   Vector3,
 } from 'three';
 // import { ShaderPass } from "../modules/ShaderPass.js";
+import metaversefile from 'metaversefile';
+const {useMaterials} = metaversefile;
+const {WebaverseRawShaderMaterial} = useMaterials();
+
+const baseUrl = import.meta.url.replace(/(\/)[^\/\\]*$/, '$1');
 
 const loader = new TextureLoader();
-const blade = loader.load("../assets/blade.jpg");
+const blade = loader.load(`${baseUrl}blade.jpg`);
 
 const vertexShader = `precision highp float;
 
@@ -44,7 +49,7 @@ out vec2 vUv;
 out float vDry;
 out float vLight;
 
-#define PI 3.1415926535897932384626433832795
+// #define PI 3.1415926535897932384626433832795
 // const float pos_infinity = uintBitsToFloat(0x7F800000);
 // const float neg_infinity = uintBitsToFloat(0xFF800000);
 
@@ -433,7 +438,7 @@ void main() {
   p *= scale;
   
   vec4 mvPosition = modelViewMatrix * vec4(p, 1.0);
-  gl_Position = projectionMatrix * mvPosition;;
+  gl_Position = projectionMatrix * mvPosition;
 }`;
 
 const fragmentShader = `precision highp float;
@@ -461,7 +466,7 @@ void main() {
   fragColor = vec4(color * vUv.y, 1.);
 }`;
 
-class GrassMaterial extends RawShaderMaterial {
+class GrassMaterial extends WebaverseRawShaderMaterial {
   constructor(options) {
     super({
       vertexShader,
