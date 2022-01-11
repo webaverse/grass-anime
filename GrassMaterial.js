@@ -633,4 +633,15 @@ class GrassMaterial extends WebaverseRawShaderMaterial {
   }
 }
 
-export { GrassMaterial };
+class GrassDepthMaterial extends MeshNormalMaterial {
+  constructor(options = {}) {
+    super(options);
+  }
+  onBeforeCompile(parameters) {
+    /* parameters.vertexShader = parameters.vertexShader.replace('#include <defaultnormal_vertex>\n', `\
+    `); */
+    console.log('got normal map shader', parameters.vertexShader, parameters.fragmentShader);
+  }
+}
+
+export { GrassMaterial, GrassDepthMaterial };

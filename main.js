@@ -30,7 +30,7 @@ import {
   LinearFilter,
 } from 'three';
 import * as THREE from 'three';
-import { GrassMaterial } from "./GrassMaterial.js";
+import { GrassMaterial, GrassDepthMaterial } from "./GrassMaterial.js";
 // import { nextPowerOfTwo, randomInRange, VERSION } from "../modules/Maf.js";
 import { pointsOnPlane } from "./Fibonacci.js";
 import { perlin3 } from "./perlin.js";
@@ -227,6 +227,8 @@ export default e => {
     }
     mesh = new InstancedMesh(geometry, material, points.length);
     mesh.castShadow = mesh.receiveShadow = true;
+    mesh.customDepthMaterial = new GrassDepthMaterial();
+    // console.log('got frag 1', mesh.customDepthMaterial.fragmentShader);
     app.add(mesh);
 
     // const offsetData = new Float32Array(width * height * 3);
