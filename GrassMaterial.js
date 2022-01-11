@@ -52,6 +52,7 @@ out float vLight;
 // #define PI 3.1415926535897932384626433832795
 // const float pos_infinity = uintBitsToFloat(0x7F800000);
 // const float neg_infinity = uintBitsToFloat(0xFF800000);
+#define USE_INSTANCING
 
 
 
@@ -472,12 +473,15 @@ void main() {
     instanceMatrix *
     rotationMatrix(vec3(0, 0., 1.), PI/2. + atan(direction.z, direction.x));
 
-  // vec3 instanceDirection = direction; // applyVectorQuaternion(direction, quaternionV);
-  
-  // p *= scale;
-  
-  vec4 mvPosition = modelViewMatrix * instanceMatrix * vec4(p, 1.0);
+  vec3 transformed = p;
+  vec4 mvPosition = vec4( transformed, 1.0 );
+  #ifdef USE_INSTANCING
+    mvPosition = instanceMatrix * mvPosition;
+  #endif
+  mvPosition = modelViewMatrix * mvPosition;
   gl_Position = projectionMatrix * mvPosition;
+
+  // gl_Position = projectionMatrix * modelViewMatrix * instanceMatrix * vec4(transformed, 1.0);
 }`;
 
 const fragmentShader = `precision highp float;
