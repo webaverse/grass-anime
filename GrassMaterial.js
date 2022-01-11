@@ -429,7 +429,7 @@ void main() {
   vec4 quaternionV2 = getQuaternionFromAxisAngle(axisAngleV.rgb, axisAngleV.a);
   vec4 quaternionV = multiplyQuaternions(quaternionV1, quaternionV2);
   vec3 scaleV = vec3(1., 1., bladeLength);
-  mat4 instanceMatrix2 = compose(positionV, quaternionV, scaleV);
+  mat4 instanceMatrix = compose(positionV, quaternionV, scaleV);
 
   float id = instanceColor.x;
   vec2 curlTSize = vec2(textureSize(curlMap, 0));
@@ -443,7 +443,7 @@ void main() {
 
   // base position
   vUv = vec2(uv.x, 1.-uv.y);
-  vec3 base = (instanceMatrix2 * vec4(position.xy, 0., 1.)).xyz + offset;
+  vec3 base = (instanceMatrix * vec4(position.xy, 0., 1.)).xyz + offset;
   vec3 dBoulder = mod(boulder-base + rangeWidth / 2., rangeWidth) - rangeWidth / 2.;
   vLight = (1./length(dBoulder))/5.;
   vLight = pow(vLight, 2.);
@@ -467,16 +467,16 @@ void main() {
   vDry = curlV.a;
 
   // p = rotateVectorAxisAngle(p, vec3(0, 0., 1.), PI/2. + atan(direction.z, direction.x));
-  instanceMatrix2 = makeScaleMatrix(vec3(scale)) *
+  instanceMatrix = makeScaleMatrix(vec3(scale)) *
     makeTranslationMatrix(offset) *
-    instanceMatrix2 *
+    instanceMatrix *
     rotationMatrix(vec3(0, 0., 1.), PI/2. + atan(direction.z, direction.x));
 
   // vec3 instanceDirection = direction; // applyVectorQuaternion(direction, quaternionV);
   
   // p *= scale;
   
-  vec4 mvPosition = modelViewMatrix * instanceMatrix2 * vec4(p, 1.0);
+  vec4 mvPosition = modelViewMatrix * instanceMatrix * vec4(p, 1.0);
   gl_Position = projectionMatrix * mvPosition;
 }`;
 
