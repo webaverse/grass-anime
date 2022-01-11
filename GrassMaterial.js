@@ -367,6 +367,46 @@ vec3 fourTap3(sampler2D tex, vec2 uv) {
   }
   return sum / totalWeight;
 }
+mat4 makeTranslationMatrix(vec3 translation) {
+  mat4 m;
+  m[0][0] = 1.;
+  m[0][1] = 0.;
+  m[0][2] = 0.;
+  m[0][3] = 0.;
+  m[1][0] = 0.;
+  m[1][1] = 1.;
+  m[1][2] = 0.;
+  m[1][3] = 0.;
+  m[2][0] = 0.;
+  m[2][1] = 0.;
+  m[2][2] = 1.;
+  m[2][3] = 0.;
+  m[3][0] = translation.x;
+  m[3][1] = translation.y;
+  m[3][2] = translation.z;
+  m[3][3] = 1.;
+  return m;
+}
+mat4 makeScaleMatrix(vec3 scale) {
+  mat4 m;
+  m[0][0] = scale.x;
+  m[0][1] = 0.;
+  m[0][2] = 0.;
+  m[0][3] = 0.;
+  m[1][0] = 0.;
+  m[1][1] = scale.y;
+  m[1][2] = 0.;
+  m[1][3] = 0.;
+  m[2][0] = 0.;
+  m[2][1] = 0.;
+  m[2][2] = scale.z;
+  m[2][3] = 0.;
+  m[3][0] = 0.;
+  m[3][1] = 0.;
+  m[3][2] = 0.;
+  m[3][3] = 1.;
+  return m;
+}
 
 void main() {
   vec3 offset = vec3(instanceColor.y, 0., instanceColor.z);
@@ -426,18 +466,17 @@ void main() {
 
   vDry = curlV.a;
 
-  p = rotateVectorAxisAngle(p, vec3(0, 0., 1.), PI/2. + atan(direction.z, direction.x));
-
-  p = (instanceMatrix2 * vec4(p, 1.0)).xyz;
+  // p = rotateVectorAxisAngle(p, vec3(0, 0., 1.), PI/2. + atan(direction.z, direction.x));
+  instanceMatrix2 = makeScaleMatrix(vec3(scale)) *
+    makeTranslationMatrix(offset) *
+    instanceMatrix2 *
+    rotationMatrix(vec3(0, 0., 1.), PI/2. + atan(direction.z, direction.x));
 
   // vec3 instanceDirection = direction; // applyVectorQuaternion(direction, quaternionV);
   
-  p += offset;
-  // p.y *= 2. / length(vec3(position.x, 0., position.z));
-  // p.y *= 1.2;
-  p *= scale;
+  // p *= scale;
   
-  vec4 mvPosition = modelViewMatrix * vec4(p, 1.0);
+  vec4 mvPosition = modelViewMatrix * instanceMatrix2 * vec4(p, 1.0);
   gl_Position = projectionMatrix * mvPosition;
 }`;
 
