@@ -325,8 +325,6 @@ export default e => {
             const uv2 = uv.clone().add(new THREE.Vector2(0.25, 0.25)).multiplyScalar(0.5).add(new THREE.Vector2(dx*0.5, dy*0.5));
             const uv2Mod = new THREE.Vector2(mod(uv2.x, 1), mod(uv2.y, 1));
 
-            // console.log('got', uv2.toArray(), uv2Mod.toArray());
-
             const p = localVector2.set(-size/2 + uv2Mod.x * size, 0, size/2 - uv2Mod.y * size);
             const {
               baseQuaternion,
@@ -420,7 +418,8 @@ export default e => {
       NearestFilter,
       NearestFilter,
     );
-    material.uniforms.offsetTexture.value = offsetTexture; */
+    material.uniforms.offsetTexture.value = offsetTexture;
+    mesh.customDepthMaterial.uniforms.offsetTexture.value = offsetTexture; */
     
     const offsetTexture2 = new DataTexture(
       offsetData2,
@@ -463,46 +462,6 @@ export default e => {
       LinearFilter,
     );
     material.uniforms.quaternionTexture2.value = quaternionTexture2;
-
-    /* const scaleTexture = new DataTexture(
-      scaleData,
-      width,
-      height,
-      RGBFormat,
-      FloatType,
-      undefined,
-      RepeatWrapping,
-      RepeatWrapping,
-      NearestFilter,
-      NearestFilter,
-    );
-    material.uniforms.scaleTexture.value = scaleTexture; */
-
-    /* curlPass = new CurlPass(
-      renderer,
-      new DataTexture(
-        curlData,
-        width,
-        height,
-        RGBFormat,
-        FloatType,
-        undefined,
-        RepeatWrapping,
-        RepeatWrapping,
-        LinearFilter,
-        LinearFilter
-      ),
-      width,
-      height
-    );
-    material.uniforms.curlMap.value = curlPass.texture; */
-
-    // curlPass.shader.uniforms.persistence.value = 1; // randomInRange(1, 1.5);
-    // curlPass.shader.uniforms.speed.value = 1; // randomInRange(1, 2);
-
-    /* updateFn = () => {
-      controls.
-    }; */
   }
 
   distributeGrass();
@@ -577,65 +536,45 @@ export default e => {
     const dt = timeDiff / 1000;
     prevTime = t;
 
-    // controls.autoRotate = true;
-    // controls.rotateSpeed = 0.1;
-    // controls.update();
-
-    // mouse.x = 0.5 * Math.cos(time);
-    // mouse.y = 0.5 * Math.sin(0.9 * time);
-    /* raycaster.setFromCamera(mouse, camera);
-    const intersects = raycaster.intersectObject(plane); */
-
-    // if (intersects.length) {
-      const localPlayer = useLocalPlayer();
-      point.copy(localPlayer.position)
-        .divideScalar(scale);
-      // boulder.position.copy(point);
-    // }
+    const localPlayer = useLocalPlayer();
+    point.copy(localPlayer.position)
+      .divideScalar(scale);
 
     if (running) {
       time += dt;
     }
 
-    /* if (curlPass && running) {
-      curlPass.shader.uniforms.time.value = time / 10;
-      curlPass.render();
-    } */
-
-    material.uniforms.boulder.value.copy(point);
-    material.uniforms.time.value = time / 10;
-    material.uniforms.scale.value = scale;
-    material.uniforms.size.value = size;
-
-    material.uniforms.direction.value.set(0, 0, -1)
-      // .add(camera.up)
-      .normalize()
-      .applyQuaternion(camera.quaternion)
-    // material.uniforms.direction.value.y = 0;
-    // material.uniforms.direction.value.normalize();
-    if (material.uniforms.direction.value.length() < 0.01) {
-      material.uniforms.direction.value.copy(camera.up)
-        .applyQuaternion(camera.quaternion);
-      material.uniforms.direction.value.y = 0;
-      material.uniforms.direction.value.normalize();
+    {
+      material.uniforms.boulder.value.copy(point);
+      material.uniforms.time.value = time / 10;
+      material.uniforms.scale.value = scale;
+      material.uniforms.size.value = size;
+      material.uniforms.direction2.value.set(0, 0, -1)
+        .normalize()
+        .applyQuaternion(camera.quaternion)
+      if (material.uniforms.direction2.value.length() < 0.01) {
+        material.uniforms.direction2.value.copy(camera.up)
+          .applyQuaternion(camera.quaternion);
+        material.uniforms.direction2.value.y = 0;
+        material.uniforms.direction2.value.normalize();
+      }
+      material.uniforms.cameraTarget.value.copy(localPlayer.position);
     }
-
-    material.uniforms.cameraTarget.value.copy(localPlayer.position);
-    // plane.position.set(controls.target.x, 0, controls.target.z);
-    // plane.updateMatrixWorld();
-
-    // post.render(scene, camera);
-    // renderer.render(scene, camera);
-    
-
-    // frames++;
-    // if (frames > 240) {
-    //   frames = 0;
-    //   randomize();
-    // }
-    // capture(renderer.domElement);
-
-    // renderer.setAnimationLoop(render);
+    if (mesh.customDepthMaterial.uniforms) {
+      for (const uniformName of [
+        'boulder',
+        'time',
+        'scale',
+        'size',
+        'direction2',
+        'cameraTarget',
+        'offsetTexture2',
+        'quaternionTexture',
+        'quaternionTexture2',
+      ]) {
+        mesh.customDepthMaterial.uniforms[uniformName].value = material.uniforms[uniformName].value;
+      }
+    }
   }
   useFrame(render);
 
