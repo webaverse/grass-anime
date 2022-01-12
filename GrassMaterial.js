@@ -570,7 +570,7 @@ void main() {
   vec3 color4 = vec3(216., 255., 147.)/ 255.;
 
   vec3 color = mix(mix(color1, color2, vUv.y), color3, vDry);
-  color -= 0.1;
+  color -= 0.05;
   color += vLight;
   // color = mix(color, color4, vLight);
   gl_FragColor = vec4(color * vUv.y, 1.);
