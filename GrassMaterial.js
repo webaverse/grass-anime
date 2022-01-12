@@ -467,15 +467,7 @@ const grassShaderChunks = {
     m[3][3] = 1.;
     return m;
   }`,
-};
-
-const vertexShader = `precision highp float;
-#define USE_INSTANCING
-${grassShaderChunks.attributes}
-${grassShaderChunks.uniforms}
-${grassShaderChunks.functions}
-
-void main() {
+  main: `\
   vec3 offset = vec3(instanceColor.y, 0., instanceColor.z);
   vec2 curlUv = instanceColor.yz / size + 0.5;
   
@@ -496,7 +488,6 @@ void main() {
   vec4 quaternionV2 = getQuaternionFromAxisAngle(axisAngleV.rgb, axisAngleV.a);
   vec4 quaternionV = multiplyQuaternions(quaternionV1, quaternionV2);
   vec3 scaleV = vec3(1., 1., bladeLength);
-  mat4 instanceMatrix = compose(positionV, quaternionV, scaleV);
 
   float id = instanceColor.x;
   // vec2 curlTSize = vec2(textureSize(curlMap, 0));
@@ -510,7 +501,7 @@ void main() {
 
   // base position
   vUv = vec2(uv.x, 1.-uv.y);
-  vec3 base = (instanceMatrix * vec4(position.xy, 0., 1.)).xyz + offset;
+  vec3 base = vec3(position.xy, 0.) + offset;
   vec3 dBoulder = mod(boulder-base + rangeWidth / 2., rangeWidth) - rangeWidth / 2.;
   vLight = (1./length(dBoulder))/10.;
   vLight = pow(vLight, 2.);
@@ -533,11 +524,22 @@ void main() {
 
   vDry = curlV.a;
 
-  // p = rotateVectorAxisAngle(p, vec3(0, 0., 1.), PI/2. + atan(direction2.z, direction2.x));
-  instanceMatrix = makeScaleMatrix(vec3(scale)) *
+  // p = rotateVectorAxisAngle(p, vec3(0, 0., 1.), PI/2. + atan(-direction2.z, -direction2.x));
+  mat4 instanceMatrix = makeScaleMatrix(vec3(scale)) *
     makeTranslationMatrix(offset) *
-    instanceMatrix *
+    compose(positionV, quaternionV, scaleV) *
     rotationMatrix(vec3(0, 0., 1.), PI/2. + atan(-direction2.z, -direction2.x));
+  `
+};
+
+const vertexShader = `precision highp float;
+#define USE_INSTANCING
+${grassShaderChunks.attributes}
+${grassShaderChunks.uniforms}
+${grassShaderChunks.functions}
+
+void main() {
+  ${grassShaderChunks.main}
 
   vec4 mvPosition = vec4( transformed, 1.0 );
   #ifdef USE_INSTANCING
@@ -568,7 +570,7 @@ void main() {
   vec3 color4 = vec3(216., 255., 147.)/ 255.;
 
   vec3 color = mix(mix(color1, color2, vUv.y), color3, vDry);
-  color -= 0.05;
+  color -= 0.1;
   color += vLight;
   // color = mix(color, color4, vLight);
   gl_FragColor = vec4(color * vUv.y, 1.);
@@ -622,68 +624,7 @@ class GrassDepthMaterial extends MeshNormalMaterial {
     ${grassShaderChunks.functions}
     `;
     const postMain = `\
-      vec3 offset = vec3(instanceColor.y, 0., instanceColor.z);
-      vec2 curlUv = instanceColor.yz / size + 0.5;
-      
-      const float offsetRange = 2.;
-      const float rangeWidth = offsetRange * 2.;
-      vec3 ct = cameraTarget/scale;
-      vec3 minRange = vec3(ct.x - offsetRange, 0., ct.z - offsetRange);
-      vec3 maxRange = vec3(ct.x + offsetRange, 0., ct.z + offsetRange);
-      offset = modXZ(
-        minRange,
-        maxRange,
-        offset
-      );
-    
-      vec3 positionV = texture2D(offsetTexture2, curlUv).rgb;
-      vec4 quaternionV1 = texture2D(quaternionTexture, curlUv);
-      vec4 axisAngleV = texture2D(quaternionTexture2, curlUv);
-      vec4 quaternionV2 = getQuaternionFromAxisAngle(axisAngleV.rgb, axisAngleV.a);
-      vec4 quaternionV = multiplyQuaternions(quaternionV1, quaternionV2);
-      vec3 scaleV = vec3(1., 1., bladeLength);
-    
-      float id = instanceColor.x;
-      // vec2 curlTSize = vec2(textureSize(curlMap, 0));
-      vec2 curlUv2 = vec2(offset.x, offset.z);
-      vec4 curlV = colorNoise(curlUv2 * 400. + id * 0.0002, 1., 4., 0.5);
-      curlV.rgb *= 30.;
-      // curlV.rb *= 0.2;
-      // curlV.g -= 10.;
-      curlV.a += 0.5;
-      // curlV.a *= 1.25;
-    
-      // base position
-      vUv = vec2(uv.x, 1.-uv.y);
-      vec3 base = vec3(position.xy, 0.) + offset;
-      vec3 dBoulder = mod(boulder-base + rangeWidth / 2., rangeWidth) - rangeWidth / 2.;
-      vLight = (1./length(dBoulder))/10.;
-      vLight = pow(vLight, 2.);
-      /* if(length(dBoulder)>cover) {
-        dBoulder = vec3(0.);
-      } */
-    
-      // curl
-      vec3 n = curlV.xyz;
-      float h = (1.+ curlV.a);
-      float l = length(dBoulder) > 0. ? (length(dBoulder)/cover) : 0.;
-      vec3 pNormal = (transpose2(inverse2(modelMatrix)) * vec4(normalize(vec3(.01 * n.xy, 1.)), 1.)).xyz;
-      vec3 target = normalize(position + pNormal) * h;
-      // vNormal = normalMatrix * normal;
-      vec3 transformed = position;
-      float f = inCubic(position.z);
-      transformed = mix(transformed, target, f);
-      // p = mix(p, p - dBoulder * l, f);
-      // p *= length(dBoulder);
-    
-      vDry = curlV.a;
-    
-      mat4 instanceMatrix;
-      // p = rotateVectorAxisAngle(p, vec3(0, 0., 1.), PI/2. + atan(-direction2.z, -direction2.x));
-      instanceMatrix = makeScaleMatrix(vec3(scale)) *
-        makeTranslationMatrix(offset) *
-        compose(positionV, quaternionV, scaleV) *
-        rotationMatrix(vec3(0, 0., 1.), PI/2. + atan(-direction2.z, -direction2.x));
+      ${grassShaderChunks.main}
     `;
 
     parameters.vertexShader = parameters.vertexShader.replace('void main() {\n', preMain + 'void main() {\n' + postMain);
