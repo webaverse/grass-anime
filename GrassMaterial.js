@@ -655,7 +655,7 @@ class GrassDepthMaterial extends MeshNormalMaterial {
     
       // base position
       vUv = vec2(uv.x, 1.-uv.y);
-      vec3 base = (instanceMatrix * vec4(position.xy, 0., 1.)).xyz + offset;
+      vec3 base = vec3(position.xy, 0.) + offset;
       vec3 dBoulder = mod(boulder-base + rangeWidth / 2., rangeWidth) - rangeWidth / 2.;
       vLight = (1./length(dBoulder))/10.;
       vLight = pow(vLight, 2.);
