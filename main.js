@@ -227,8 +227,7 @@ export default e => {
     }
     mesh = new InstancedMesh(geometry, material, points.length);
     mesh.castShadow = mesh.receiveShadow = true;
-    mesh.customDepthMaterial = new GrassDepthMaterial();
-    // console.log('got frag 1', mesh.customDepthMaterial.fragmentShader);
+    mesh.customPostMaterial = new GrassDepthMaterial();
     app.add(mesh);
 
     // const offsetData = new Float32Array(width * height * 3);
@@ -419,7 +418,7 @@ export default e => {
       NearestFilter,
     );
     material.uniforms.offsetTexture.value = offsetTexture;
-    mesh.customDepthMaterial.uniforms.offsetTexture.value = offsetTexture; */
+    mesh.customPostMaterial.uniforms.offsetTexture.value = offsetTexture; */
     
     const offsetTexture2 = new DataTexture(
       offsetData2,
@@ -560,7 +559,7 @@ export default e => {
       }
       material.uniforms.cameraTarget.value.copy(localPlayer.position);
     }
-    if (mesh.customDepthMaterial.uniforms) {
+    if (mesh.customPostMaterial.uniforms) {
       for (const uniformName of [
         'boulder',
         'time',
@@ -572,7 +571,7 @@ export default e => {
         'quaternionTexture',
         'quaternionTexture2',
       ]) {
-        mesh.customDepthMaterial.uniforms[uniformName].value = material.uniforms[uniformName].value;
+        mesh.customPostMaterial.uniforms[uniformName].value = material.uniforms[uniformName].value;
       }
     }
   }
