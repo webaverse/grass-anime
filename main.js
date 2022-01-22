@@ -432,6 +432,7 @@ export default e => {
       LinearFilter,
       LinearFilter,
     );
+    offsetTexture2.needsUpdate = true;
     material.uniforms.offsetTexture2.value = offsetTexture2;
 
     const quaternionTexture = new DataTexture(
@@ -446,6 +447,7 @@ export default e => {
       LinearFilter,
       LinearFilter,
     );
+    quaternionTexture.needsUpdate = true;
     material.uniforms.quaternionTexture.value = quaternionTexture;
 
     const quaternionTexture2 = new DataTexture(
@@ -460,6 +462,7 @@ export default e => {
       LinearFilter,
       LinearFilter,
     );
+    quaternionTexture2.needsUpdate = true;
     material.uniforms.quaternionTexture2.value = quaternionTexture2;
   }
 
