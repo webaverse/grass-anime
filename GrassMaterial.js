@@ -468,7 +468,6 @@ const grassShaderChunks = {
     return m;
   }`,
   main: `\
-
   vec3 offset = vec3(instanceColor.y, 0., instanceColor.z);
   vec2 curlUv = instanceColor.yz / size + 0.5;
   
