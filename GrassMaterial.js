@@ -8,16 +8,18 @@ import {
   Vector2,
   Vector3,
   NoBlending,
+  Texture
 } from 'three';
 // import { ShaderPass } from "../modules/ShaderPass.js";
 import metaversefile from 'metaversefile';
 const {useMaterials} = metaversefile;
 const {WebaverseRawShaderMaterial} = useMaterials();
 
-const baseUrl = import.meta.url.replace(/(\/)[^\/\\]*$/, '$1');
+const baseUrl = import.meta.url.replace(/(\/)[^\/]*$/, '$1');
 
 const loader = new TextureLoader();
-const blade = loader.load(`${baseUrl}blade.jpg`);
+const blade = loader.load(`http://localhost/grass-anime/blade.jpg`);
+// const blade = loader.load(`${baseUrl}blade.jpg`);
 
 const grassShaderChunks = {
   attributes: `\
@@ -468,6 +470,7 @@ const grassShaderChunks = {
     return m;
   }`,
   main: `\
+
   vec3 offset = vec3(instanceColor.y, 0., instanceColor.z);
   vec2 curlUv = instanceColor.yz / size + 0.5;
   
@@ -534,6 +537,9 @@ const grassShaderChunks = {
 
 const vertexShader = `precision highp float;
 #define USE_INSTANCING
+#ifndef PI
+  #define PI 3.14159265358979323846
+#endif
 ${grassShaderChunks.attributes}
 ${grassShaderChunks.uniforms}
 ${grassShaderChunks.functions}
