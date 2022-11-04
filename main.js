@@ -422,7 +422,7 @@ export default e => {
       offsetData2,
       width,
       height,
-      RGBFormat,
+      RGBAFormat,
       FloatType,
       undefined,
       RepeatWrapping,
