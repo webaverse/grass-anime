@@ -534,6 +534,9 @@ const grassShaderChunks = {
 
 const vertexShader = `precision highp float;
 #define USE_INSTANCING
+#ifndef PI
+  #define PI 3.14159265358979323846
+#endif
 ${grassShaderChunks.attributes}
 ${grassShaderChunks.uniforms}
 ${grassShaderChunks.functions}
